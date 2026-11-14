@@ -294,7 +294,7 @@ inline static void loadConfig() {
     }
 }
 
-void main (void) {
+int main(void) {
     wdtSetTimeout(WDT_TIMEOUT_DEFAULT);
 
     DDRA |= _BV(DRIVER_ENABLE);

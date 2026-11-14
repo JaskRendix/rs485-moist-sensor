@@ -97,7 +97,7 @@ main.hex: main.elf
 	avr-objcopy -j .text -j .data -O ihex main.elf main.hex
 	avr-objcopy -j .eeprom --set-section-flags=.eeprom="alloc,load" \
 		--change-section-lma .eeprom=0 -O ihex main.elf main.eep
-	avr-size -C --mcu=$(DEVICE) main.elf
+	avr-size --mcu=$(DEVICE) main.elf
 
 # debugging targets:
 
