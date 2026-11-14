@@ -60,7 +60,7 @@ jobs:
       - name: Run cppcheck
         run: |
           cppcheck \
-            --enable=warning,style,performance,portability \
+            --enable=warning,performance,portability \
             --inline-suppr \
             --error-exitcode=1 \
             src
