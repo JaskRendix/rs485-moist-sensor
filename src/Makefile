@@ -8,19 +8,32 @@
 # This Revision: $Id: Makefile 692 2008-11-07 15:07:40Z cs $
 
 DEVICE  = attiny441
-F_CPU   = 16000000	# in Hz
-FUSE_L  = 0xAF# see below for fuse values for particular devices
+
+# in Hz
+F_CPU   = 16000000
+
+FUSE_L  = 0xAF
+# see below for fuse values for particular devices
 FUSE_H  = 0xDF
 FUSE_E  = 0xED
+
 AVRDUDE = avrdude -c usbasp -P usb -p $(DEVICE) -e # edit this line for your programmer
 
-CFLAGS  = -Iusbdrv -I. -DDEBUG_LEVEL=0  -Os -std=gnu99
-CFLAGS += -ffunction-sections -fdata-sections -save-temps 
+CFLAGS  = -Iusbdrv -I. -DDEBUG_LEVEL=0 -Os -std=gnu99
+CFLAGS += -Wall -Wextra
+CFLAGS += -ffunction-sections -fdata-sections -save-temps
+CFLAGS += -MMD -MP
+
 LDFLAGS += -Wl,--gc-sections,--relax
 
 OBJECTS = main.o thermistor.o modbus.o measurement.o
 
-COMPILE = avr-gcc -DF_CPU=$(F_CPU) $(CFLAGS) $(LDFLAGS) -mmcu=$(DEVICE)  
+CC      = avr-gcc
+
+COMPILE = $(CC) -DF_CPU=$(F_CPU) $(CFLAGS) -mmcu=$(DEVICE)
+LINK    = $(CC) -mmcu=$(DEVICE) $(LDFLAGS)
+
+.PHONY: help clean flash fuse program ci
 
 # symbolic targets:
 help:
@@ -35,6 +48,8 @@ hex: main.hex
 
 program: flash fuse
 
+ci: clean hex
+
 # rule for programming fuse bits:
 fuse:
 	@[ "$(FUSE_H)" != "" -a "$(FUSE_L)" != "" ] || \
@@ -43,12 +58,15 @@ fuse:
 
 # rule for uploading firmware:
 flash: main.hex
-	$(AVRDUDE) -U flash:w:main.hex:i -U eeprom:w:main.eep:i #-B 20.92 
+	$(AVRDUDE) -U flash:w:main.hex:i -U eeprom:w:main.eep:i #-B 20.92
+
 sflash: main.hex
 	$(AVRDUDE) -U flash:w:main.hex:i -B 20.92
+
 # rule for deleting dependent files (those which can be built by Make):
 clean:
-	rm -f main.hex main.lst main.obj main.cof main.list main.map main.eep.hex main.elf *.o main.s *.i *.s
+	rm -f main.hex main.lst main.obj main.cof main.list main.map \
+		main.eep main.eep.hex main.elf *.o *.d main.s *.i *.s
 
 # Generic rule for compiling C files:
 .c.o:
@@ -57,6 +75,7 @@ clean:
 # Generic rule for assembling Assembler source files:
 .S.o:
 	$(COMPILE) -x assembler-with-cpp -c $< -o $@
+
 # "-x assembler-with-cpp" should not be necessary since this is the default
 # file type for the .S (with capital S) extension. However, upper case
 # characters are not always preserved on Windows. To ensure WinAVR
@@ -70,19 +89,22 @@ clean:
 
 # Since we don't want to ship the driver multipe times, we copy it into this project:
 
-main.elf: $(OBJECTS)	# usbdrv dependency only needed because we copy it
-	$(COMPILE) -L /usr/lib/avr/lib/ldscripts/ -o main.elf $(OBJECTS)
+main.elf: $(OBJECTS)    # usbdrv dependency only needed because we copy it
+	$(LINK) -L /usr/lib/avr/lib/ldscripts/ -o main.elf $(OBJECTS)
 
 main.hex: main.elf
 	rm -f main.hex main.eep.hex
 	avr-objcopy -j .text -j .data -O ihex main.elf main.hex
-	avr-objcopy -j .eeprom --set-section-flags=.eeprom="alloc,load" --change-section-lma .eeprom=0 -O ihex main.elf main.eep
-	avr-size main.hex
+	avr-objcopy -j .eeprom --set-section-flags=.eeprom="alloc,load" \
+		--change-section-lma .eeprom=0 -O ihex main.elf main.eep
+	avr-size -C --mcu=$(DEVICE) main.elf
 
 # debugging targets:
 
-disasm:	main.elf
+disasm: main.elf
 	avr-objdump -d main.elf
 
 cpp:
 	$(COMPILE) -E main.c
+
+-include $(OBJECTS:.o=.d)

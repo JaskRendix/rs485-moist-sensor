@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install AVR toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            gcc-avr \
+            avr-libc \
+            binutils-avr \
+            make
+
+      - name: Build firmware
+        working-directory: src
+        run: |
+          make clean
+          make hex
+
+      - name: Show firmware information
+        working-directory: src
+        run: |
+          avr-size main.elf
+
+      - name: Upload firmware artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: firmware
+          path: |
+            src/main.hex
+            src/main.eep
+            src/main.elf
+          if-no-files-found: error
+
+  cppcheck:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install cppcheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cppcheck
+
+      - name: Run cppcheck
+        run: |
+          cppcheck \
+            --enable=warning,style,performance,portability \
+            --inline-suppr \
+            --error-exitcode=1 \
+            src
