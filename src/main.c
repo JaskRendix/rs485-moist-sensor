@@ -88,11 +88,11 @@ inline static bool isValidAddress(uint8_t address) {
 }
 
 inline static bool isValidBaud(uint8_t baudIdx) {
-    return baudIdx >=0 && baudIdx < 8;
+    return baudIdx < 8;
 }
 
 inline static bool isValidParity(uint8_t parityIdx) {
-    return parityIdx >=0 && parityIdx < 3;
+    return parityIdx < 3;
 }
 
 static inline bool isAddressRegisterSet() {
@@ -245,7 +245,7 @@ void sleep() {
     wdtSetTimeout(WDT_TIMEOUT_DEFAULT);
 
     performMeasurement((uint16_t*) &(inputRegisters.asStruct.moisture), 
-                            (uint16_t*) &(inputRegisters.asStruct.temperature));
+                            (int16_t*) &(inputRegisters.asStruct.temperature));
 
     UCSR0B |= _BV(TXEN0);
     serialReaderEnable();
@@ -275,14 +275,14 @@ inline static void loadConfig() {
     }
 
     temp = eeprom_read_byte(&eeprom_baudIdx);
-    if(temp >= 0 && temp < 8) {
+    if(temp < 8) {
         holdingRegisters.asStruct.baud = temp;
     } else {
         holdingRegisters.asStruct.baud = 4;
     }
 
     temp = eeprom_read_byte(&eeprom_parityIdx);
-    if(temp >=0 && temp < 3) {
+    if(temp < 3) {
         holdingRegisters.asStruct.parity = temp;
     } else {
         holdingRegisters.asStruct.parity = 0;
@@ -315,13 +315,13 @@ void main (void) {
     timer1msStart(&(holdingRegisters.asStruct.measurementIntervalMs));
 
     performMeasurement((uint16_t*) &(inputRegisters.asStruct.moisture), 
-                            (uint16_t*) &(inputRegisters.asStruct.temperature));
+                            (int16_t*) &(inputRegisters.asStruct.temperature));
 
     serialReaderEnable();
 
     while(1) {
         processMeasurements((uint16_t*) &(inputRegisters.asStruct.moisture), 
-                            (uint16_t*) &(inputRegisters.asStruct.temperature));
+                            (int16_t*) &(inputRegisters.asStruct.temperature));
         modbusGet();
 
         if(isSleepTimeSet() && modbusIsIdle() && modbusIsTXComplete()) {

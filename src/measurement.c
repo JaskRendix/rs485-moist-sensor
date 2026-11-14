@@ -15,7 +15,6 @@ uint8_t measurementState = STATE_MEASUREMENT_OFF;
 
 volatile uint16_t milliseconds = 0;
 volatile uint16_t *measurementTimeoutMs;
-uint8_t temp;
 
 static inline void powerToDividersEnable() {
     PORTA |= _BV(POWER_TO_DIVIDERS);
@@ -81,13 +80,13 @@ ISR(TIMER1_COMPA_vect) {
 }
 
 inline static void excitationEnable() {
-    temp = CLKCR & ~_BV(CKOUTC);
+    uint8_t temp = CLKCR & ~_BV(CKOUTC);
     CCP = 0xD8;
     CLKCR = temp;
 }
 
 inline static void excitationDisable() {
-    temp = CLKCR | _BV(CKOUTC);
+    uint8_t temp = CLKCR | _BV(CKOUTC);
     CCP = 0xD8;
     CLKCR = temp;
     DDRB |= _BV(PB2);
