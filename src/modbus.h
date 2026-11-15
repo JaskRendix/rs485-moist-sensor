@@ -28,6 +28,7 @@ LICENSE:
 #define __MODBUS_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #define ecIllegalFunction 1
 #define ecIllegalDataAddress 2

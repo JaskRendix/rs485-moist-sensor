@@ -19,6 +19,7 @@ LICENSE:
 ************************************************************************/
 
 #include "modbus.h"
+#include "modbus_utils.h"
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <stdbool.h>
@@ -60,40 +61,6 @@ volatile bool frameNOK = false;
 volatile bool frameAvailable = false;
 uint8_t ownAddress = 0;
 volatile uint8_t dataPos = 0;
-
-/* @brief: A fairly simple Modbus compliant 16 Bit CRC algorithm.
- *
- *  	Returns 1 if the crc check is positive, returns 0 and saves the
- *calculated CRC bytes at the end of the data array if it fails.
- *
- */
-uint8_t crc16(volatile uint8_t *ptrToArray,
-              uint8_t inputSize) // A standard CRC algorithm
-{
-  uint16_t out = 0xffff;
-  uint16_t carry;
-  unsigned char n;
-  inputSize++;
-  for (int l = 0; l < inputSize; l++) {
-    out ^= ptrToArray[l];
-    for (n = 0; n < 8; n++) {
-      carry = out & 1;
-      out >>= 1;
-      if (carry)
-        out ^= 0xA001;
-    }
-  }
-  // out=0x1234;
-  if ((ptrToArray[inputSize] == out % 256) &&
-      (ptrToArray[inputSize + 1] == out / 256)) // check
-  {
-    return 1;
-  } else {
-    ptrToArray[inputSize] = out % 256;     // append Lo
-    ptrToArray[inputSize + 1] = out / 256; // append Hi
-    return 0;
-  }
-}
 
 void start35Timer() {
   TCNT2 = 0;
@@ -359,29 +326,6 @@ void modbusSendException(unsigned char exceptionCode) {
   rxbuffer[2] =
       exceptionCode; // Exceptioncode. Also the last byte containing data
   modbusSendMessage(2);
-}
-
-/* @brief: copies a single or multiple bytes from one array of bytes to an array
- * of 16-bit-words
- *
- */
-void intToModbusRegister(volatile uint16_t *inreg, volatile uint8_t *outreg,
-                         uint8_t amount) {
-  for (uint8_t c = 0; c < amount; c++) {
-    *(outreg + c * 2) = (uint8_t)(*(inreg + c) >> 8);
-    *(outreg + 1 + c * 2) = (uint8_t)(*(inreg + c));
-  }
-}
-
-/* @brief: copies a single or multiple 16-bit-words from one array of integers
- * to an array of bytes
- *
- */
-void modbusRegisterToInt(volatile uint8_t *inreg, volatile uint16_t *outreg,
-                         uint8_t amount) {
-  for (uint8_t c = 0; c < amount; c++) {
-    *(outreg + c) = (*(inreg + c * 2) << 8) + *(inreg + 1 + c * 2);
-  }
 }
 
 /* @brief: Handles single/multiple register reading and single/multiple register
