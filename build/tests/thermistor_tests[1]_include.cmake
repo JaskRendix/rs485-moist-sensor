@@ -1,5 +1,0 @@
-if(EXISTS "/home/giorgio/rs485-moist-sensor/build/tests/thermistor_tests[1]_tests.cmake")
-  include("/home/giorgio/rs485-moist-sensor/build/tests/thermistor_tests[1]_tests.cmake")
-else()
-  add_test(thermistor_tests_NOT_BUILT thermistor_tests_NOT_BUILT)
-endif()

@@ -1,9 +1,0 @@
-Thermistor.ClampHot 3 0.00164899
-Thermistor.ClampCold 3 0.00159875
-Thermistor.ExactTablePoints 1 0.00554111
-Thermistor.Monotonic 3 0.00218078
-Thermistor.TwentyFiveDegrees 0 0
-Thermistor.Around25CPoint 2 0.00268427
-Thermistor.NeverExceedsRange 2 0.00387957
-Thermistor.FullDomain 2 0.0023884
----

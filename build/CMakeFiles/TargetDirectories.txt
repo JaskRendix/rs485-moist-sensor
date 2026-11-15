@@ -1,7 +1,0 @@
-/home/giorgio/rs485-moist-sensor/build/CMakeFiles/test.dir
-/home/giorgio/rs485-moist-sensor/build/CMakeFiles/edit_cache.dir
-/home/giorgio/rs485-moist-sensor/build/CMakeFiles/rebuild_cache.dir
-/home/giorgio/rs485-moist-sensor/build/tests/CMakeFiles/thermistor_tests.dir
-/home/giorgio/rs485-moist-sensor/build/tests/CMakeFiles/test.dir
-/home/giorgio/rs485-moist-sensor/build/tests/CMakeFiles/edit_cache.dir
-/home/giorgio/rs485-moist-sensor/build/tests/CMakeFiles/rebuild_cache.dir
