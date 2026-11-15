@@ -2,10 +2,19 @@
 *.kicad_pcb-bak
 *.sch-bak
 $*
+
 *.o
 *.s
 *.i
+*.d
+
 *.hex
-*.net
+*.eep
 *.elf
+*.map
+*.lst
+
 a.out
+
+# CMake
+/build/
