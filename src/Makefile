@@ -26,7 +26,7 @@ CFLAGS += -MMD -MP
 
 LDFLAGS += -Wl,--gc-sections,--relax
 
-OBJECTS = main.o thermistor.o modbus.o measurement.o
+OBJECTS = main.o thermistor.o modbus.o modbus_utils.o measurement.o
 
 CC      = avr-gcc
 
